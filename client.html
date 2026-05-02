@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Medical Lab Booking</title>
+
+<style>
+body{
+    margin:0;
+    padding:0;
+    font-family:Arial, sans-serif;
+    background:url("lab.jpg");
+    background-size:cover;
+    background-position:center;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.container{
+    background:rgba(255,255,255,0.92);
+    padding:30px;
+    border-radius:18px;
+    width:420px;
+    box-shadow:0 0 20px rgba(0,0,0,0.35);
+}
+
+h2{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+input[type="text"],
+input[type="time"]{
+    width:100%;
+    padding:12px;
+    margin-top:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    box-sizing:border-box;
+    font-size:15px;
+}
+
+.tests{
+    margin-top:15px;
+    padding:12px;
+    background:#f7f7f7;
+    border-radius:10px;
+}
+
+.tests label{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:8px 0;
+    font-size:16px;
+}
+
+.tests input[type="checkbox"]{
+    width:18px;
+    height:18px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:18px;
+    background:green;
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:darkgreen;
+}
+
+#result{
+    margin-top:18px;
+    padding:12px;
+    background:#eefbea;
+    border-radius:10px;
+    color:green;
+    font-weight:bold;
+    text-align:left;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Book Lab Test</h2>
+
+<form id="bookingForm">
+
+<input type="text" id="name" placeholder="Enter Name" required>
+<input type="text" id="phone" placeholder="Enter Phone" required>
+
+<label><input type="checkbox" name="test" value="Blood Test"> Blood Test</label>
+<label><input type="checkbox" name="test" value="Sugar Test"> Sugar Test</label>
+<label><input type="checkbox" name="test" value="Thyroid Test"> Thyroid Test</label>
+<label><input type="checkbox" name="test" value="Urine Test"> Urine Test</label>
+<label><input type="checkbox" name="test" value="Vitamin Test"> Vitamin Test</label>
+
+<input type="time" id="time" required>
+
+<button type="submit">Book Now</button>
+
+</form>
+
+<p id="result"></p>
+
+</div>
+
+<script>
+document.getElementById("bookingForm").addEventListener("submit", async function(e){
+
+e.preventDefault();
+
+let selectedTests = [];
+
+document.querySelectorAll('input[name="test"]:checked').forEach((item)=>{
+    selectedTests.push(item.value);
+});
+
+const data = {
+name: document.getElementById("name").value,
+phone: document.getElementById("phone").value,
+test: selectedTests,
+time: document.getElementById("time").value
+};
+
+const response = await fetch("http://127.0.0.1:8000/book",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body: JSON.stringify(data)
+});
+
+const result = await response.json();
+
+document.getElementById("result").innerHTML =
+`
+Booking Successful <br><br>
+Name: ${data.name}<br>
+Phone: ${data.phone}<br>
+Tests: ${data.test.join(", ")}<br>
+Time: ${data.time}
+`;
+
+});
+</script>
+
+</body>
+</html>

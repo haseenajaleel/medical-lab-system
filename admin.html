@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Panel</title>
+<style>
+body{
+    font-family: Arial;
+    padding: 30px;
+    background: #f4f4f4;
+}
+h2{
+    text-align: center;
+    color: green;
+}
+table{
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+th, td{
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+th{
+    background: green;
+    color: white;
+}
+tr:nth-child(even){
+    background: #f9f9f9;
+}
+.status-booked { color: green; font-weight: bold; }
+.status-cancelled { color: red; font-weight: bold; }
+.status-ready { color: blue; font-weight: bold; }
+.refresh-info {
+    text-align: center;
+    color: gray;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+</style>
+</head>
+<body>
+
+<h2>Medical Lab Admin Panel</h2>
+<p class="refresh-info">Auto refreshing every 5 seconds...</p>
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Phone</th>
+<th>Tests</th>
+<th>Time</th>
+<th>Status</th>
+<th>Booked At</th>
+</tr>
+</thead>
+<tbody id="tableData"></tbody>
+</table>
+
+<script>
+async function loadBookings() {
+    try {
+        const response = await fetch("http://127.0.0.1:8000/bookings");
+        const data = await response.json();
+
+        if (data.length === 0) {
+            document.getElementById("tableData").innerHTML = `
+                <tr><td colspan="6">No bookings yet</td></tr>
+            `;
+            return;
+        }
+
+        let rows = "";
+        data.forEach(item => {
+            const status = item.status || "Booked";
+            const statusClass = status === "Booked" ? "status-booked" :
+                               status === "Cancelled" ? "status-cancelled" :
+                               status === "Report Ready" ? "status-ready" : "";
+            rows += `
+                <tr>
+                    <td>${item.name || "-"}</td>
+                    <td>${item.phone || "-"}</td>
+                    <td>${
+                        item.test
+                        ? (Array.isArray(item.test) ? item.test.join(", ") : item.test)
+                        : "-"
+                    }</td>
+                    <td>${item.time || "-"}</td>
+                    <td class="${statusClass}">${status}</td>
+                    <td>${item.booked_at ? item.booked_at.substring(0,16) : "-"}</td>
+                </tr>
+            `;
+        });
+
+        document.getElementById("tableData").innerHTML = rows;
+
+    } catch (error) {
+        document.getElementById("tableData").innerHTML = `
+            <tr><td colspan="6" style="color:red">
+                Error connecting to server. Make sure FastAPI is running at port 8000.
+            </td></tr>
+        `;
+        console.error("Error:", error);
+    }
+}
+
+loadBookings();
+setInterval(loadBookings, 5000);
+</script>
+
+</body>
+</html>
